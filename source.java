@@ -17,7 +17,6 @@ public class Checkers {
 	
 	public static void main(String[] args) {
 		newGameStart();
-		outputBoard();
 		playerMove(0, "aaa");
 	}
 	
@@ -35,6 +34,18 @@ public class Checkers {
 			isNum = true;
 		} catch (NumberFormatException e) {}
 		return isNum;
+	}
+	
+	/* Method Name: newMove
+	 * Parameters:
+	 * 		int pre -> the prefix section of the new integer
+	 * 		int suf -> the suffix section of the new integer
+	 * Return: int -> the parameters combined
+	 * Output: None
+	 */
+	
+	public static int newMove(int pre, int suf) {
+		return Integer.parseInt(Integer.toString(pre) + Integer.toString(suf));
 	}
 	
 	/* Method Name: outputBoard
@@ -61,6 +72,20 @@ public class Checkers {
 			System.out.print(i + " ");
 		}
 		System.out.print(" \n");
+	}
+	
+	/* Method Name: syncBoard
+	 * Parameters: None
+	 * Return: None
+	 * Output: Synchronizes the simulated board with the real board
+	 */
+	
+	public static void syncBoard() {
+		for (int i = 1; i <= 8; i++) {
+			for (int j = 1; j <= 8; j++) {
+				simBoard[i][j] = board[i][j];
+			}
+		}
 	}
 	
 	/* Method Name: newGameStart
@@ -109,6 +134,25 @@ public class Checkers {
 		}
 	}
 	
+	/* Method Name: moveParts
+	 * Parameters:
+	 * 		int move -> the move to be split up
+	 * Return: ArrayList<Integer> -> a list of the parts of the move
+	 * Output: None
+	 */
+	
+	public static ArrayList<Integer> moveParts(int move) {
+		ArrayList<Integer> parts = new ArrayList<Integer>();
+		if (move > 9999) {
+			
+		}
+		else {
+			parts.add(move / 100);
+			parts.add(move % 100);
+		}
+		return parts;
+	}
+	
 	/* Method Name: validMove
 	 * Parameters: None
 	 * Return: ArrayList<Integer> -> a list of all valid moves by both sides in a given position
@@ -117,12 +161,30 @@ public class Checkers {
 	
 	public static ArrayList<Integer> validMove() {
 		ArrayList<Integer> moves = new ArrayList<Integer>();
-		/* RETURN A LIST OF MOVES
-		 * Three parts:
-		 * 1. Non-capturing moves (single analysis)
-		 * 2. Capturing moves (single analysis)
-		 * 3. Chained capturing moves (recursive or iterative analysis)
-		 */
+		for (int i = 1; i <= 8; i++) {
+			for (int j = 1; j <= 8; j++) {
+				if (board[i][j] == 'o' || board[i][j] == 'O' || board[i][j] == 'X') {
+					if (board[i + 1][j + 1] == '.') {
+						moves.add(newMove(newMove(i, j), newMove(i + 1, j + 1)));
+					}
+					if (board[i + 1][j - 1] == '.') {
+						moves.add(newMove(newMove(i, j), newMove(i + 1, j - 1)));
+					}
+				}
+				if (board[i][j] == 'x' || board[i][j] == 'O' || board[i][j] == 'X') {
+					if (board[i - 1][j + 1] == '.') {
+						moves.add(newMove(newMove(i, j), newMove(i - 1, j + 1)));
+					}
+					if (board[i - 1][j - 1] == '.') {
+						moves.add(newMove(newMove(i, j), newMove(i - 1, j - 1)));
+					}
+				}
+				ArrayList<Integer> capMoves = altValidMove(newMove(i, j));
+				for (int k : capMoves) {
+					moves.add(newMove(i, newMove(j, k)));
+				}
+			}
+		}
 		return moves;
 	}
 	
@@ -137,6 +199,30 @@ public class Checkers {
 		return moves;
 	}
 	
+	/* Method Name: doMove
+	 * Parameters:
+	 * 		int move -> the move to be played on the board
+	 * Return: None
+	 * Output: None
+	 */
+	
+	public static void doMove(int move) {
+		ArrayList<Integer> parts = moveParts(move);
+		//requires moveParts to be completed
+	}
+	
+	/* Method Name: checkGame
+	 * Parameters:
+	 * 		int player -> the player of the moves being checked
+	 * Return: boolean -> if the game has been won yet
+	 * Output: None
+	 */
+	
+	public static boolean checkGame(int player) {
+		//requires moveParts to be completed
+		return true;
+	}
+	
 	/* Method Name: playerMove
 	 * Parameters:
 	 * 		int player -> if the player is playing as X or O
@@ -149,9 +235,10 @@ public class Checkers {
 		//variables for each move
 		int move;
 		String input;
-		ArrayList<Integer> movelist = validMove();
+		ArrayList<Integer> moves = validMove();
 		
 		//introduction to each move
+		outputBoard();
 		System.out.print(name + ", make your turn. ");
 		if (player == 0) {
 			System.out.println("You are playing as O");
@@ -169,13 +256,22 @@ public class Checkers {
 			}
 			else if (isNum(input)) {
 				move = Integer.parseInt(input);
-				//CHECK IF MOVE IS VALID IN MOVELIST
-				break;
+				for (int i : moves) {
+					System.out.println(i);
+				}
+				if (moves.contains(move)) {
+					doMove(move);
+					break;
+				}
+				else {
+					System.out.println("Invalid move! Please enter a valid move, or enter Help for the help section.");
+				}
 			}
 			else {
 				System.out.println("Invalid move! Please enter a valid move, or enter Help for the help section.");
 			}
 		}
+		playerMove(1, "bbbb");
 	}
 	
 	/* Method Name: comMove
@@ -261,8 +357,8 @@ public class Checkers {
 		System.out.println("Movement for chain captures is as such: <starting row><starting column><passing row><passing column><ending row><ending column>.");
 		System.out.println("The examples for notation for the previous three examples of movement are as such:");
 		System.out.println("(This is assuming that the rows start at the bottom with 1, and start on the left side with 1, and both increase by 1 with each square)");
-		System.out.println("a) 1133");
-		System.out.println("b) 2211");
-		System.out.println("c) 1331, 1324, 133153\n");
+		System.out.println("a) 3113");
+		System.out.println("b) 2231");
+		System.out.println("c) 5344, 5331, 533113\n");
 	}
 }
