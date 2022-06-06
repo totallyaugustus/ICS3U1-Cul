@@ -126,6 +126,17 @@ public class Checkers {
 		return moves;
 	}
 	
+	/* Method Name: altValidMove
+	 * Parameters:
+	 * 		int pre -> the square which the capturing piece is on
+	 * Return: ArrayList<Integer> -> a list of all valid captures for a given piece in a position
+	 */
+	
+	public static ArrayList<Integer> altValidMove(int pre) {
+		ArrayList<Integer> moves = new ArrayList<Integer>();
+		return moves;
+	}
+	
 	/* Method Name: playerMove
 	 * Parameters:
 	 * 		int player -> if the player is playing as X or O
