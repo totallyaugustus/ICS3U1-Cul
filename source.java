@@ -10,14 +10,21 @@ import java.util.*;
 import java.io.*;
 
 public class Checkers {
-	//work out variables
+	//variables and containers used in a static reference (deal with it)
+	static boolean twoPlayer;
 	static char board[][] = new char[10][10];
 	static char simBoard[][] = new char[10][10];
+	static char playerNum[] = {'o', 'x', 'O', 'X'};
+	static String playerName[] = new String[2];
 	static Scanner sc = new Scanner(System.in);
 	
 	public static void main(String[] args) {
+		System.out.print("Player 1's name: ");
+		playerName[0] = sc.nextLine();
+		System.out.print("Player 2's name: ");
+		playerName[1] = sc.nextLine();
 		newGameStart();
-		playerMove(0, "aaa");
+		playerMove(0);
 	}
 	
 	/* Method Name: isNum
@@ -25,6 +32,7 @@ public class Checkers {
 	 * 		String inString -> a string which may be parsed into an integer
 	 * Return: boolean -> if the string inString can be parsed into an integer
 	 * Output: None
+	 * Function: Returns a boolean value for if a given string can be parsed into an integer
 	 */
 	
 	public static boolean isNum(String inString) {
@@ -42,6 +50,7 @@ public class Checkers {
 	 * 		int suf -> the suffix section of the new integer
 	 * Return: int -> the parameters combined
 	 * Output: None
+	 * Function: Given a prefix move section and a suffix move section, it concatenates them and returns a combined move
 	 */
 	
 	public static int newMove(int pre, int suf) {
@@ -51,7 +60,8 @@ public class Checkers {
 	/* Method Name: outputBoard
 	 * Parameters: None
 	 * Return: None
-	 * Output: Outputs the game board with row and column axis coordinates
+	 * Output: Game Board, Axis Coordinates
+	 * Function: Outputs the real board with row and column axis coordinates
 	 */
 	
 	public static void outputBoard() {
@@ -77,7 +87,8 @@ public class Checkers {
 	/* Method Name: syncBoard
 	 * Parameters: None
 	 * Return: None
-	 * Output: Synchronizes the simulated board with the real board
+	 * Output: None
+	 * Function: Synchronizes the simulated board with the real board
 	 */
 	
 	public static void syncBoard() {
@@ -91,7 +102,8 @@ public class Checkers {
 	/* Method Name: newGameStart
 	 * Parameters: None
 	 * Return: None
-	 * Output: Sets up the game board with the correct characters as pieces at each game start
+	 * Output: None
+	 * Function: Sets up the real board as if starting a new game
 	 */
 	
 	public static void newGameStart() {
@@ -139,49 +151,56 @@ public class Checkers {
 	 * 		int move -> the move to be split up
 	 * Return: ArrayList<Integer> -> a list of the parts of the move
 	 * Output: None
+	 * Function: Given a move, it splits it up into a list of the squares touched or referenced by the move
 	 */
 	
 	public static ArrayList<Integer> moveParts(int move) {
+		ArrayList<Integer> tempParts = new ArrayList<Integer>();
 		ArrayList<Integer> parts = new ArrayList<Integer>();
-		if (move > 9999) {
-			
+		while (move > 100) {
+			tempParts.add(move % 100);
+			move /= 100;
 		}
-		else {
-			parts.add(move / 100);
-			parts.add(move % 100);
+		tempParts.add(move);
+		for (int i = tempParts.size() - 1; i >= 0; i--) {
+			parts.add(tempParts.get(i));
 		}
 		return parts;
 	}
 	
 	/* Method Name: validMove
-	 * Parameters: None
-	 * Return: ArrayList<Integer> -> a list of all valid moves by both sides in a given position
+	 * Parameters:
+	 * 		int player -> the player of which the moves are found
+	 * Return: ArrayList<Integer> -> a list of all valid moves by a player in a given position
 	 * Output: None
+	 * Function: Finds out all the valid moves for a player in a given position
 	 */
 	
-	public static ArrayList<Integer> validMove() {
+	public static ArrayList<Integer> validMove(int player) {
 		ArrayList<Integer> moves = new ArrayList<Integer>();
 		for (int i = 1; i <= 8; i++) {
 			for (int j = 1; j <= 8; j++) {
-				if (board[i][j] == 'o' || board[i][j] == 'O' || board[i][j] == 'X') {
-					if (board[i + 1][j + 1] == '.') {
-						moves.add(newMove(newMove(i, j), newMove(i + 1, j + 1)));
+				if (board[i][j] == playerNum[player] || board[i][j] == playerNum[player + 2]) {
+					if (board[i][j] != playerNum[0]) {
+						if (board[i - 1][j - 1] == '.') {
+							moves.add(newMove(newMove(i, j), newMove(i - 1, j - 1)));
+						}
+						if (board[i - 1][j + 1] == '.') {
+							moves.add(newMove(newMove(i, j), newMove(i - 1, j + 1)));
+						}
 					}
-					if (board[i + 1][j - 1] == '.') {
-						moves.add(newMove(newMove(i, j), newMove(i + 1, j - 1)));
+					if (board[i][j] != playerNum[1]) {
+						if (board[i + 1][j - 1] == '.') {
+							moves.add(newMove(newMove(i, j), newMove(i + 1, j - 1)));
+						}
+						if (board[i + 1][j + 1] == '.') {
+							moves.add(newMove(newMove(i, j), newMove(i + 1, j + 1)));
+						}
 					}
 				}
-				if (board[i][j] == 'x' || board[i][j] == 'O' || board[i][j] == 'X') {
-					if (board[i - 1][j + 1] == '.') {
-						moves.add(newMove(newMove(i, j), newMove(i - 1, j + 1)));
-					}
-					if (board[i - 1][j - 1] == '.') {
-						moves.add(newMove(newMove(i, j), newMove(i - 1, j - 1)));
-					}
-				}
-				ArrayList<Integer> capMoves = altValidMove(newMove(i, j));
-				for (int k : capMoves) {
-					moves.add(newMove(i, newMove(j, k)));
+				for (int k : altValidMove(player, newMove(i, j))) {
+					moves.add(newMove(newMove(i, j), k));
+					syncBoard();
 				}
 			}
 		}
@@ -190,56 +209,127 @@ public class Checkers {
 	
 	/* Method Name: altValidMove
 	 * Parameters:
+	 * 		int player -> the side of which we are using
 	 * 		int pre -> the square which the capturing piece is on
 	 * Return: ArrayList<Integer> -> a list of all valid captures for a given piece in a position
+	 * Output: None
+	 * Function: Given a starting square in the simulated board, it returns all possible captures and chain captures from that square for a certain player in a given position
 	 */
 	
-	public static ArrayList<Integer> altValidMove(int pre) {
+	public static ArrayList<Integer> altValidMove(int player, int pre) {
+		char save;
+		ArrayList<Integer> tempMoves = new ArrayList<Integer>();
 		ArrayList<Integer> moves = new ArrayList<Integer>();
+		if (simBoard[pre / 10][pre % 10] == playerNum[player] || simBoard[pre / 10][pre % 10] == playerNum[player + 2]) {
+			if (simBoard[pre / 10][pre % 10] != playerNum[0]) {
+				if (simBoard[(pre / 10) - 1][(pre % 10) - 1] == playerNum[(player + 1) % 4] || simBoard[(pre / 10) - 1][(pre % 10) - 1] == playerNum[(player + 3) % 4]) {
+					if (simBoard[(pre / 10) - 2][(pre % 10) - 2] == '.') {
+						tempMoves.add(newMove((pre / 10) - 2, (pre % 10) - 2));
+					}
+				}
+				if (simBoard[(pre / 10) - 1][(pre % 10) + 1] == playerNum[(player + 1) % 4] || simBoard[(pre / 10) - 1][(pre % 10) + 1] == playerNum[(player + 3) % 4]) {
+					if (simBoard[(pre / 10) - 2][(pre % 10) + 2] == '.') {
+						tempMoves.add(newMove((pre / 10) - 2, (pre % 10) + 2));
+					}
+				}
+			}
+			if (simBoard[pre / 10][pre % 10] != playerNum[1]) {
+				if (simBoard[(pre / 10) + 1][(pre % 10) - 1] == playerNum[(player + 1) % 4] || simBoard[(pre / 10) + 1][(pre % 10) - 1] == playerNum[(player + 3) % 4]) {
+					if (simBoard[(pre / 10) + 2][(pre % 10) - 2] == '.') {
+						tempMoves.add(newMove((pre / 10) + 2, (pre % 10) - 2));
+					}
+				}
+				if (simBoard[(pre / 10) + 1][(pre % 10) + 1] == playerNum[(player + 1) % 4] || simBoard[(pre / 10) + 1][(pre % 10) + 1] == playerNum[(player + 3) % 4]) {
+					if (simBoard[(pre / 10) + 2][(pre % 10) + 2] == '.') {
+						tempMoves.add(newMove((pre / 10) + 2, (pre % 10) + 2));
+					}
+				}
+			}
+		}
+		for (int i : tempMoves) {
+			moves.add(i);
+			save = simBoard[((pre / 10) + (i / 10)) / 2][((pre % 10) + (i % 10)) / 2];
+			simBoard[((pre / 10) + (i / 10)) / 2][((pre % 10) + (i % 10)) / 2] = '.';
+			simBoard[i / 10][i % 10] = simBoard[pre / 10][pre % 10];
+			simBoard[pre / 10][pre % 10] = '.';
+			for (int j : altValidMove(player, i)) {
+				moves.add(newMove(i, j));
+			}
+			simBoard[((pre / 10) + (i / 10)) / 2][((pre % 10) + (i % 10)) / 2] = save;
+			simBoard[pre / 10][pre % 10] = simBoard[i / 10][i % 10];
+			simBoard[i / 10][i % 10] = '.';
+		}
 		return moves;
 	}
 	
 	/* Method Name: doMove
 	 * Parameters:
-	 * 		int move -> the move to be played on the board
+	 * 		ArrayList<Integer> parts -> the parts of the move to be played
 	 * Return: None
 	 * Output: None
+	 * Function: Plays a given move on the real board
 	 */
 	
-	public static void doMove(int move) {
-		ArrayList<Integer> parts = moveParts(move);
-		//requires moveParts to be completed
+	public static void doMove(ArrayList<Integer> parts) {
+		if (Math.abs((parts.get(0) % 10) - (parts.get(1) % 10)) == 1) {
+			board[parts.get(1) / 10][parts.get(1) % 10] = board[parts.get(0) / 10][parts.get(0) % 10];
+			board[parts.get(0) / 10][parts.get(0) % 10] = '.';
+		}
+		else {
+			while (parts.size() > 1) {
+				board[parts.get(1) / 10][parts.get(1) % 10] = board[parts.get(0) / 10][parts.get(0) % 10];
+				board[((parts.get(0) / 10) + (parts.get(1) / 10)) / 2][((parts.get(0) % 10) + (parts.get(1) % 10)) / 2] = '.';
+				board[parts.get(0) / 10][parts.get(0) % 10] = '.';
+				parts.remove(0);
+			}
+		}
+	}
+	
+	/* Method Name: promote
+	 * Parameters: None
+	 * Return: None
+	 * Output: None
+	 * Function: Promotes any piece found on the last row of their respective side
+	 */
+	
+	public static void promote() {
+		
 	}
 	
 	/* Method Name: checkGame
 	 * Parameters:
 	 * 		int player -> the player of the moves being checked
-	 * Return: boolean -> if the game has been won yet
+	 * Return: boolean -> if the player has any moves left
 	 * Output: None
+	 * Function: Finds out if a given player has any valid moves left to play
 	 */
 	
 	public static boolean checkGame(int player) {
-		//requires moveParts to be completed
+		ArrayList<Integer> moves = validMove(player);
+		if (moves.size() == 0) {
+			return false;
+		}
 		return true;
 	}
 	
 	/* Method Name: playerMove
 	 * Parameters:
 	 * 		int player -> if the player is playing as X or O
-	 * 		String name -> the name of a player
 	 * Return: None
 	 * Output: Prompts for user input
+	 * Function: Goes through a single human's player's turn
 	 */
 	
-	public static void playerMove(int player, String name) {
+	public static void playerMove(int player) {
 		//variables for each move
 		int move;
 		String input;
-		ArrayList<Integer> moves = validMove();
+		syncBoard();
+		ArrayList<Integer> moves = validMove(player);
 		
 		//introduction to each move
 		outputBoard();
-		System.out.print(name + ", make your turn. ");
+		System.out.print(playerName[player] + ", make your turn. ");
 		if (player == 0) {
 			System.out.println("You are playing as O");
 		}
@@ -256,11 +346,8 @@ public class Checkers {
 			}
 			else if (isNum(input)) {
 				move = Integer.parseInt(input);
-				for (int i : moves) {
-					System.out.println(i);
-				}
 				if (moves.contains(move)) {
-					doMove(move);
+					doMove(moveParts(move));
 					break;
 				}
 				else {
@@ -271,7 +358,12 @@ public class Checkers {
 				System.out.println("Invalid move! Please enter a valid move, or enter Help for the help section.");
 			}
 		}
-		playerMove(1, "bbbb");
+		if (!checkGame((player + 1) % 2)) {
+			System.out.println("Player " + playerName[player] + " has won!");
+		}
+		else {
+			playerMove((player + 1) % 2);
+		}
 	}
 	
 	/* Method Name: comMove
@@ -280,6 +372,7 @@ public class Checkers {
 	 * 		int depth -> how far the computer searches ahead to decide its moves
 	 * Return: None
 	 * Output: Move done by the computer
+	 * Function: Goes through a single move done by the computer
 	 */
 	
 	public static void comMove(int player, int depth) {
@@ -291,16 +384,30 @@ public class Checkers {
 	 * 		int depth -> how far the computer searches in the future to simulate moves
 	 * Return: int -> the optimal move for the current simulated board
 	 * Output: None
+	 * Function: Simulates a possible play if a turn is played, all simulated by the computer to be used in turn calculations
 	 */
 	
 	public static int altComMove(int player, int depth) {
 		return 3;
 	}
 	
+	/* Method Name: query
+	 * Parameters:
+	 * 		String pre -> the string containing the query
+	 * Return: None
+	 * Output: The metadata of the given square
+	 * Function: Given a square, it returns information about that square if a query is demanded
+	 */
+	
+	public static void query(String pre) {
+		
+	}
+	
 	/* Method Name: help
 	 * Parameters: None
 	 * Return: None
 	 * Output: A guide on the rules, move input format, and how to enter chain capture moves
+	 * Function: Outputs a general help guide for the game of Checkers
 	 */
 	
 	public static void help() {
@@ -329,9 +436,10 @@ public class Checkers {
 		System.out.println("	1. Diagonally adjacent and the direction is valid to the type of piece.");
 		System.out.println("	2. The next space in the direction of the capture is unoccupied.");
 		System.out.println("Chain captures can happen if capture puts the capturing piece into a space which allows it to capture another piece.");
+		System.out.println("Chain captures will always terminate when the capturing piece promotes.");
 		System.out.println("Non-king pieces can only move forwards, while king pieces can go both forwards and backwards.");
 		System.out.println("Several examples of movement:");
-		System.out.println("(Only the movement of the O pieces are shown, with (<piece>) being a possible square for any O <piece>)");
+		System.out.println("Only the movement of the O pieces are shown, with (<piece>) being a possible square for any O <piece>");
 		System.out.println("a) ************* b) *************");
 		System.out.println("   * O |   |   *    *(o)|   | x *");
 		System.out.println("   *-----------*    *-----------*");
@@ -356,9 +464,14 @@ public class Checkers {
 		System.out.println("For chain captures, the notation will include any passing squares in the order that they are passed.");
 		System.out.println("Movement for chain captures is as such: <starting row><starting column><passing row><passing column><ending row><ending column>.");
 		System.out.println("The examples for notation for the previous three examples of movement are as such:");
-		System.out.println("(This is assuming that the rows start at the bottom with 1, and start on the left side with 1, and both increase by 1 with each square)");
+		System.out.println("This is assuming that the rows start at the bottom with 1, and start on the left side with 1, and both increase by 1 with each square");
 		System.out.println("a) 3113");
 		System.out.println("b) 2231");
 		System.out.println("c) 5344, 5331, 533113\n");
+		System.out.println("Querying:");
+		System.out.println("Querying is a way to clearly identify any square.");
+		System.out.println("A query can be described as ?<row><column>.");
+		System.out.println("Here is an example set for example board a):");
+		System.out.println("?11 -> King O Piece, ?12 -> Empty Square, ?22 -> Non-King X Piece\n");
 	}
 }
