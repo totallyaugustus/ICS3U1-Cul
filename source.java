@@ -11,7 +11,6 @@ import java.io.*;
 
 public class Checkers {
 	//variables and containers used in a static reference (deal with it)
-	static boolean twoPlayer;
 	static char board[][] = new char[10][10];
 	static char simBoard[][] = new char[10][10];
 	static char playerNum[] = {'o', 'x', 'O', 'X'};
@@ -283,6 +282,7 @@ public class Checkers {
 				parts.remove(0);
 			}
 		}
+		promote();
 	}
 	
 	/* Method Name: promote
@@ -293,7 +293,14 @@ public class Checkers {
 	 */
 	
 	public static void promote() {
-		
+		for (int i = 1; i <= 8; i++) {
+			if (board[8][i] == 'o') {
+				board[8][i] = 'O';
+			}
+			if (board[1][i] == 'x') {
+				board[1][i] = 'X';
+			}
+		}
 	}
 	
 	/* Method Name: checkGame
@@ -329,12 +336,11 @@ public class Checkers {
 		
 		//introduction to each move
 		outputBoard();
-		System.out.print(playerName[player] + ", make your turn. ");
 		if (player == 0) {
-			System.out.println("You are playing as O");
+			System.out.println(playerName[player] + ", make your turn. You are playing as O.");
 		}
 		else {
-			System.out.println("You are playing as X");
+			System.out.println(playerName[player] + ", make your turn. You are playing as X.");
 		}
 		
 		//input for each move
@@ -343,6 +349,9 @@ public class Checkers {
 			input = sc.nextLine();
 			if (input.toUpperCase().equals("HELP")) {
 				help();
+			}
+			else if (input.charAt(0) == '?') {
+				query(input);
 			}
 			else if (isNum(input)) {
 				move = Integer.parseInt(input);
@@ -400,7 +409,46 @@ public class Checkers {
 	 */
 	
 	public static void query(String pre) {
+		//method variables
+		int row;
+		int col;
+		char piece;
 		
+		//control flow and output
+		if (pre.length() == 3 && isNum(pre.substring(1, 2)) && isNum(pre.substring(2, 3))) {
+			row = Integer.parseInt(pre.substring(1, 2));
+			col = Integer.parseInt(pre.substring(2, 3));
+			if (row >= 1 && row <= 8 && col >= 1 && col <= 8) {
+				piece = board[row][col];
+				if ((row + col) % 2 == 1) {
+					System.out.println("The square at row " + row + " and column " + col + " is unreachable.");
+				}
+				else if (piece == '.') {
+					System.out.println("The square at row " + row + " and column " + col + " is empty.");
+				}
+				else if (piece == 'o') {
+					System.out.println("The square at row " + row + " and column " + col + " has a non-king O piece.");
+				}
+				else if (piece == 'O') {
+					System.out.println("The square at row " + row + " and column " + col + " has a king O piece.");
+				}
+				else if (piece == 'x') {
+					System.out.println("The square at row " + row + " and column " + col + " has a non-king X piece.");
+				}
+				else if (piece == 'X') {
+					System.out.println("The square at row " + row + " and column " + col + " has a king X piece.");
+				}
+				else {
+					System.out.println("Invalid query! Please enter a valid query, or enter Help for the help section.");
+				}
+			}
+			else {
+				System.out.println("Invalid query! Please enter a valid query, or enter Help for the help section.");
+			}
+		}
+		else {
+			System.out.println("Invalid query! Please enter a valid query, or enter Help for the help section.");
+		}
 	}
 	
 	/* Method Name: help
@@ -411,6 +459,7 @@ public class Checkers {
 	 */
 	
 	public static void help() {
+		//output
 		System.out.println("\nHelp Section:\n");
 		System.out.println("Goal:");
 		System.out.println("The game of checkers is played between two players.");
@@ -439,7 +488,7 @@ public class Checkers {
 		System.out.println("Chain captures will always terminate when the capturing piece promotes.");
 		System.out.println("Non-king pieces can only move forwards, while king pieces can go both forwards and backwards.");
 		System.out.println("Several examples of movement:");
-		System.out.println("Only the movement of the O pieces are shown, with (<piece>) being a possible square for any O <piece>");
+		System.out.println("Only the movement of the O pieces are shown, with (<piece>) being a possible square for any O <piece>.");
 		System.out.println("a) ************* b) *************");
 		System.out.println("   * O |   |   *    *(o)|   | x *");
 		System.out.println("   *-----------*    *-----------*");
@@ -464,7 +513,7 @@ public class Checkers {
 		System.out.println("For chain captures, the notation will include any passing squares in the order that they are passed.");
 		System.out.println("Movement for chain captures is as such: <starting row><starting column><passing row><passing column><ending row><ending column>.");
 		System.out.println("The examples for notation for the previous three examples of movement are as such:");
-		System.out.println("This is assuming that the rows start at the bottom with 1, and start on the left side with 1, and both increase by 1 with each square");
+		System.out.println("This is assuming that the rows start at the bottom with 1, and start on the left side with 1, and both increase by 1 with each square.");
 		System.out.println("a) 3113");
 		System.out.println("b) 2231");
 		System.out.println("c) 5344, 5331, 533113\n");
