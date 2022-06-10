@@ -13,6 +13,7 @@ public class Checkers {
 	//variables, containers, and objects used in a static reference (deal with it)
 	static boolean twoPlayer;
 	static int comDepth;
+	static int inf = 2147483647;
 	static char board[][] = new char[10][10];
 	static char simBoard[][] = new char[10][10];
 	static char playerNum[] = {'o', 'x', 'O', 'X'};
@@ -23,7 +24,7 @@ public class Checkers {
 		//variables, containers, and objects
 		String input;
 		
-		//control flow
+		//flow control
 		//amount of players
 		while (true) {
 			System.out.print("One player (1) or two players (2): ");
@@ -60,11 +61,11 @@ public class Checkers {
 			
 			//computer depth
 			while (true) {
-				System.out.print("Computer depth (between 1 and 5): ");
+				System.out.print("Computer depth (between 1 and 8): ");
 				input = sc.nextLine();
 				if (isNum(input)) {
 					comDepth = Integer.parseInt(input);
-					if (comDepth >= 1 && comDepth <= 5) {
+					if (comDepth >= 1 && comDepth <= 8) {
 						break;
 					}
 				}
@@ -227,7 +228,7 @@ public class Checkers {
 		ArrayList<Integer> tempParts = new ArrayList<Integer>();
 		ArrayList<Integer> parts = new ArrayList<Integer>();
 		
-		//control flow
+		//flow control
 		while (move > 100) {
 			tempParts.add(move % 100);
 			move /= 100;
@@ -296,7 +297,7 @@ public class Checkers {
 		ArrayList<Integer> tempMoves = new ArrayList<Integer>();
 		ArrayList<Integer> moves = new ArrayList<Integer>();
 		
-		//control flow
+		//flow control
 		if (simBoard[pre / 10][pre % 10] == playerNum[player] || simBoard[pre / 10][pre % 10] == playerNum[player + 2]) {
 			if (simBoard[pre / 10][pre % 10] != playerNum[0]) {
 				if (simBoard[(pre / 10) - 1][(pre % 10) - 1] == playerNum[(player + 1) % 4] || simBoard[(pre / 10) - 1][(pre % 10) - 1] == playerNum[(player + 3) % 4]) {
@@ -395,7 +396,7 @@ public class Checkers {
 		//variables, containers, and objects
 		ArrayList<Integer> moves = validMove(player);
 		
-		//control flow
+		//flow control
 		if (moves.size() == 0) {
 			return false;
 		}
@@ -410,10 +411,10 @@ public class Checkers {
 	 */
 	
 	public static double calcValue() {
-		//variables, containers, and control flow
+		//variables, containers, and objects
 		double value = 0;
 		
-		//control flow
+		//flow control
 		for (int i = 1; i <= 8; i++) {
 			for (int j = 1; j <= 8; j++) {
 				if (simBoard[i][j] == 'o') {
@@ -457,7 +458,7 @@ public class Checkers {
 			System.out.println(playerName[player] + ", make your turn. You are playing as X.");
 		}
 		
-		//control flow
+		//flow control
 		while(true) {
 			System.out.print("Move: ");
 			input = sc.nextLine();
@@ -508,69 +509,71 @@ public class Checkers {
 	public static void comMove(int player, int depth) {
 		//variables, containers, and objects
 		int move;
+		double value = -inf;
+		double tempValue;
+		ArrayList<Integer> moves = validMove(player);
 		
 		//starting turn
 		syncBoard();
 		outputBoard();
 		
-		//control flow
-		move = altComMove(player, depth);
+		//flow control
+		for (int i : moves) {
+			//do move
+			
+			tempValue = -calcValue();
+			if (tempValue > value) {
+				value = tempValue;
+			}
+			//undo move
+		}
+		
+		move = 1000;
+		
 		doMove(moveParts(move));
 		System.out.println("The computer has played " + move + ".");
 		
 		//ending turn
-		playerMove((player + 1) % 2);
+		if (!checkGame((player + 1) % 2)) {
+			System.out.println("The computer has won!");
+		}
+		else {
+			playerMove((player + 1) % 2);
+		}
 	}
 	
 	/* Method Name: altComMove
 	 * Parameters:
 	 * 		int player -> if the computer simulates playing as X or O
 	 * 		int depth -> how far the computer searches in the future to simulate moves
-	 * Return: int -> the optimal move for the current simulated board
+	 * Return: double -> the optimal move for the current simulated board
 	 * Output: None
 	 * Function: Simulates a possible play if a turn is played, all simulated by the computer to be used in turn calculations
 	 */
 	
-	public static int altComMove(int player, int depth) {
+	public static double altComMove(int player, int depth) {
 		//variables, containers, and objects
-		int move = 1000;
-		int value;
-		int inf = 2147483647;
+		int move;
+		double value = -inf;
+		double tempValue;
 		ArrayList<Integer> moves = validMove(player);
 		
-		//control flow
+		//flow control
 		if (depth == 1) {
-			if (moves.size() == 0) {
-				if (player == 0) {
-					value = -inf;
+			for (int i : moves) {
+				//do move
+				
+				tempValue = -calcValue();
+				if (tempValue > value) {
+					value = tempValue;
 				}
-				else {
-					value = inf;
-				}
-			}
-			else {
-				if (player == 0) {
-					
-				}
-				else {
-					
-				}
+				//undo move
 			}
 		}
 		else {
-			if (moves.size() == 0) {
-				if (player == 0) {
-					value = -inf;
-				}
-				else {
-					value = inf;
-				}
-			}
-			else {
-				
-			}
+			
 		}
-		return move;
+		return value;
 	}
 	
 	/* Method Name: query
@@ -587,7 +590,7 @@ public class Checkers {
 		int col;
 		char piece;
 		
-		//control flow and output
+		//flow control and output
 		if (pre.length() == 3 && isNum(pre.substring(1, 2)) && isNum(pre.substring(2, 3))) {
 			row = Integer.parseInt(pre.substring(1, 2));
 			col = Integer.parseInt(pre.substring(2, 3));
