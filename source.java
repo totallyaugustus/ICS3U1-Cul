@@ -13,7 +13,7 @@ public class Checkers {
 	//variables, containers, and objects used in a static reference (deal with it)
 	static boolean twoPlayer;
 	static int comDepth;
-	static int inf = 2147483647;
+	static final int inf = 2147483647;
 	static char board[][] = new char[10][10];
 	static char simBoard[][] = new char[10][10];
 	static char playerNum[] = {'o', 'x', 'O', 'X'};
@@ -275,7 +275,6 @@ public class Checkers {
 				}
 				for (int k : altValidMove(player, newMove(i, j))) {
 					moves.add(newMove(newMove(i, j), k));
-					syncBoard();
 				}
 			}
 		}
@@ -355,11 +354,10 @@ public class Checkers {
 			board[parts.get(0) / 10][parts.get(0) % 10] = '.';
 		}
 		else {
-			while (parts.size() > 1) {
-				board[parts.get(1) / 10][parts.get(1) % 10] = board[parts.get(0) / 10][parts.get(0) % 10];
-				board[((parts.get(0) / 10) + (parts.get(1) / 10)) / 2][((parts.get(0) % 10) + (parts.get(1) % 10)) / 2] = '.';
-				board[parts.get(0) / 10][parts.get(0) % 10] = '.';
-				parts.remove(0);
+			for (int j = 0; j < parts.size() - 1; j++) {
+				board[parts.get(j + 1) / 10][parts.get(j + 1) % 10] = board[parts.get(j) / 10][parts.get(j) % 10];
+				board[((parts.get(j) / 10) + (parts.get(j + 1) / 10)) / 2][((parts.get(j) % 10) + (parts.get(j + 1) % 10)) / 2] = '.';
+				board[parts.get(j) / 10][parts.get(j) % 10] = '.';
 			}
 		}
 		promote();
@@ -508,7 +506,7 @@ public class Checkers {
 	
 	public static void comMove(int player, int depth) {
 		//variables, containers, and objects
-		int move;
+		int move = 1000;
 		double value = -inf;
 		double tempValue;
 		ArrayList<Integer> moves = validMove(player);
@@ -519,17 +517,42 @@ public class Checkers {
 		
 		//flow control
 		for (int i : moves) {
-			//do move
-			
-			tempValue = -calcValue();
+			ArrayList<Integer> parts = moveParts(i);
+			ArrayList<Character> saves = new ArrayList<Character>();
+			if (Math.abs((parts.get(0) / 10) - (parts.get(1) / 10)) == 1) {
+				simBoard[parts.get(1) / 10][parts.get(1) % 10] = simBoard[parts.get(0) / 10][parts.get(0) % 10];
+				simBoard[parts.get(0) / 10][parts.get(0) % 10] = '.';
+			}
+			else {
+				for (int j = 0; j < parts.size() - 1; j++) {
+					simBoard[parts.get(j + 1) / 10][parts.get(j + 1) % 10] = simBoard[parts.get(j) / 10][parts.get(j) % 10];
+					saves.add(simBoard[((parts.get(j) / 10) + (parts.get(j + 1) / 10)) / 2][((parts.get(j) % 10) + (parts.get(j + 1) % 10)) / 2]);
+					simBoard[((parts.get(j) / 10) + (parts.get(j + 1) / 10)) / 2][((parts.get(j) % 10) + (parts.get(j + 1) % 10)) / 2] = '.';
+					simBoard[parts.get(j) / 10][parts.get(j) % 10] = '.';
+				}
+			}
+			if (depth == 1) {
+				tempValue = -calcValue();
+			}
+			else {
+				tempValue = -altComMove((player + 1) % 2, depth - 1);
+			}
 			if (tempValue > value) {
 				value = tempValue;
+				move = i;
 			}
-			//undo move
+			if (Math.abs((parts.get(0) / 10) - (parts.get(1) / 10)) == 1) {
+				simBoard[parts.get(0) / 10][parts.get(0) % 10] = simBoard[parts.get(1) / 10][parts.get(1) % 10];
+				simBoard[parts.get(1) / 10][parts.get(1) % 10] = '.';
+			}
+			else {
+				for (int j = parts.size() - 1; j > 0; j--) {
+					simBoard[parts.get(j - 1) / 10][parts.get(j - 1) % 10] = simBoard[parts.get(j) / 10][parts.get(j) % 10];
+					simBoard[((parts.get(j - 1) / 10) + (parts.get(j) / 10)) / 2][((parts.get(j - 1) % 10) + (parts.get(j) % 10)) / 2] = saves.get(j - 1);
+					simBoard[parts.get(j) / 10][parts.get(j) % 10] = '.';
+				}
+			}
 		}
-		
-		move = 1000;
-		
 		doMove(moveParts(move));
 		System.out.println("The computer has played " + move + ".");
 		
@@ -553,25 +576,46 @@ public class Checkers {
 	
 	public static double altComMove(int player, int depth) {
 		//variables, containers, and objects
-		int move;
 		double value = -inf;
 		double tempValue;
 		ArrayList<Integer> moves = validMove(player);
 		
 		//flow control
-		if (depth == 1) {
-			for (int i : moves) {
-				//do move
-				
-				tempValue = -calcValue();
-				if (tempValue > value) {
-					value = tempValue;
-				}
-				//undo move
+		for (int i : moves) {
+			ArrayList<Integer> parts = moveParts(i);
+			ArrayList<Character> saves = new ArrayList<Character>();
+			if (Math.abs((parts.get(0) / 10) - (parts.get(1) / 10)) == 1) {
+				simBoard[parts.get(1) / 10][parts.get(1) % 10] = simBoard[parts.get(0) / 10][parts.get(0) % 10];
+				simBoard[parts.get(0) / 10][parts.get(0) % 10] = '.';
 			}
-		}
-		else {
-			
+			else {
+				for (int j = 0; j < parts.size() - 1; j++) {
+					simBoard[parts.get(j + 1) / 10][parts.get(j + 1) % 10] = simBoard[parts.get(j) / 10][parts.get(j) % 10];
+					saves.add(simBoard[((parts.get(j) / 10) + (parts.get(j + 1) / 10)) / 2][((parts.get(j) % 10) + (parts.get(j + 1) % 10)) / 2]);
+					simBoard[((parts.get(j) / 10) + (parts.get(j + 1) / 10)) / 2][((parts.get(j) % 10) + (parts.get(j + 1) % 10)) / 2] = '.';
+					simBoard[parts.get(j) / 10][parts.get(j) % 10] = '.';
+				}
+			}
+			if (depth == 1) {
+				tempValue = -calcValue();
+			}
+			else {
+				tempValue = -altComMove((player + 1) % 2, depth - 1);
+			}
+			if (tempValue > value) {
+				value = tempValue;
+			}
+			if (Math.abs((parts.get(0) / 10) - (parts.get(1) / 10)) == 1) {
+				simBoard[parts.get(0) / 10][parts.get(0) % 10] = simBoard[parts.get(1) / 10][parts.get(1) % 10];
+				simBoard[parts.get(1) / 10][parts.get(1) % 10] = '.';
+			}
+			else {
+				for (int j = parts.size() - 1; j > 0; j--) {
+					simBoard[parts.get(j - 1) / 10][parts.get(j - 1) % 10] = simBoard[parts.get(j) / 10][parts.get(j) % 10];
+					simBoard[((parts.get(j - 1) / 10) + (parts.get(j) / 10)) / 2][((parts.get(j - 1) % 10) + (parts.get(j) % 10)) / 2] = saves.get(j - 1);
+					simBoard[parts.get(j) / 10][parts.get(j) % 10] = '.';
+				}
+			}
 		}
 		return value;
 	}
