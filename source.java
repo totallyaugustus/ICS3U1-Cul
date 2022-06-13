@@ -61,7 +61,7 @@ public class Checkers {
 			
 			//computer depth
 			while (true) {
-				System.out.print("Computer depth (between 1 and 8): ");
+				System.out.print("Computer depth (between 1 and 6 for faster but less accurate play, 7 or 8 for slower but more accurate play): ");
 				input = sc.nextLine();
 				if (isNum(input)) {
 					comDepth = Integer.parseInt(input);
@@ -402,13 +402,14 @@ public class Checkers {
 	}
 	
 	/* Method Name: calcValue
-	 * Parameters: None
+	 * Parameters:
+	 * 		int player: the player of which to calculate a value
 	 * Return: int -> the calculated value of a given board
 	 * Output: None
 	 * Function: Finds out the calculated value of a given board
 	 */
 	
-	public static double calcValue() {
+	public static double calcValue(int player) {
 		//variables, containers, and objects
 		double value = 0;
 		
@@ -416,16 +417,37 @@ public class Checkers {
 		for (int i = 1; i <= 8; i++) {
 			for (int j = 1; j <= 8; j++) {
 				if (simBoard[i][j] == 'o') {
-					value += 10 + i;
+					if (player == 0) {
+						value += (10 + i);
+					}
+					else {
+						value -= (10 + i);
+					}
 				}
 				if (simBoard[i][j] == 'O') {
-					value += (25 - Math.abs(4.5 - i) - Math.abs(4.5 - j));
+					if (player == 0) {
+						value += (25 - Math.abs(4.5 - i) - Math.abs(4.5 - j));
+					}
+					else {
+						value -= (25 - Math.abs(4.5 - i) - Math.abs(4.5 - j));
+					}
 				}
 				if (simBoard[i][j] == 'x') {
-					value -= 10 + (9 - i);
+					if (player == 0) {
+						value -= (10 + (9 - i));
+					}
+					else {
+						value += (10 + (9 - i));
+					}
+					
 				}
 				if (simBoard[i][j] == 'X') {
-					value -= (25 - Math.abs(4.5 - i) - Math.abs(4.5 - j));
+					if (player == 0) {
+						value -= (25 - Math.abs(4.5 - i) - Math.abs(4.5 - j));
+					}
+					else {
+						value += (25 - Math.abs(4.5 - i) - Math.abs(4.5 - j));
+					}
 				}
 			}
 		}
@@ -446,6 +468,10 @@ public class Checkers {
 		String input;
 		syncBoard();
 		ArrayList<Integer> moves = validMove(player);
+		
+		for (int i : moves) {
+			System.out.print(i + " ");
+		}
 		
 		//starting turn
 		outputBoard();
@@ -509,14 +535,15 @@ public class Checkers {
 		int move = 1000;
 		double value = -inf;
 		double tempValue;
+		syncBoard();
 		ArrayList<Integer> moves = validMove(player);
 		
 		//starting turn
-		syncBoard();
 		outputBoard();
 		
 		//flow control
 		for (int i : moves) {
+			System.out.print(i + " ");
 			ArrayList<Integer> parts = moveParts(i);
 			ArrayList<Character> saves = new ArrayList<Character>();
 			if (Math.abs((parts.get(0) / 10) - (parts.get(1) / 10)) == 1) {
@@ -532,7 +559,7 @@ public class Checkers {
 				}
 			}
 			if (depth == 1) {
-				tempValue = -calcValue();
+				tempValue = -calcValue((player + 1) % 2);
 			}
 			else {
 				tempValue = -altComMove((player + 1) % 2, depth - 1);
@@ -597,7 +624,7 @@ public class Checkers {
 				}
 			}
 			if (depth == 1) {
-				tempValue = -calcValue();
+				tempValue = -calcValue((player + 1) % 2);
 			}
 			else {
 				tempValue = -altComMove((player + 1) % 2, depth - 1);
