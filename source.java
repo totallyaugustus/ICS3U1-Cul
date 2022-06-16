@@ -86,6 +86,7 @@ public class Checkers {
 						break;
 					}
 				}
+				System.out.println("That is not a valid input, please try again.");
 			}
 		}
 	}
@@ -112,15 +113,18 @@ public class Checkers {
 	
 	/* Method Name: newMove
 	 * Parameters:
-	 * 		int pre -> the prefix section of the new integer
-	 * 		int suf -> the suffix section of the new integer
-	 * Return: int -> the parameters combined
+	 * 		ArrayList<Integer> pre -> the prefix section of the new integer
+	 * 		ArrayList<Integer> suf -> the suffix section of the new integer
+	 * Return: ArrayList<Integer> -> the parameters combined
 	 * Output: None
 	 * Function: Given a prefix move section and a suffix move section, it concatenates them and returns a combined move
 	 */
 	
-	public static int newMove(int pre, int suf) {
-		return Integer.parseInt(Integer.toString(pre) + Integer.toString(suf));
+	public static ArrayList<Integer> newMove(ArrayList<Integer> pre, ArrayList<Integer> suf) {
+		for (int i : suf) {
+			pre.add(i);
+		}
+		return pre;
 	}
 	
 	/* Method Name: outputBoard
@@ -243,14 +247,14 @@ public class Checkers {
 	/* Method Name: validMove
 	 * Parameters:
 	 * 		int player -> the player of which the moves are found
-	 * Return: ArrayList<Integer> -> a list of all valid moves by a player in a given position
+	 * Return: ArrayList<ArrayList<Integer>> -> a list of all valid moves by a player in a given position
 	 * Output: None
 	 * Function: Finds out all the valid moves for a player in a given position
 	 */
 	
-	public static ArrayList<Integer> validMove(int player) {
+	public static ArrayList<ArrayList<Integer>> validMove(int player) {
 		//variables, containers, and objects
-		ArrayList<Integer> moves = new ArrayList<Integer>();
+		ArrayList<ArrayList<Integer>> moves = new ArrayList<ArrayList<Integer>>();
 		
 		//flow control
 		for (int i = 1; i <= 8; i++) {
@@ -258,23 +262,36 @@ public class Checkers {
 				if (simBoard[i][j] == playerNum[player] || simBoard[i][j] == playerNum[player + 2]) {
 					if (simBoard[i][j] != playerNum[0]) {
 						if (simBoard[i - 1][j - 1] == '.') {
-							moves.add(newMove(newMove(i, j), newMove(i - 1, j - 1)));
+							ArrayList<Integer> parts = new ArrayList<Integer>();
+							parts.add((i * 10) + j);
+							parts.add(((i - 1) * 10) + j - 1);
+							moves.add(parts);
 						}
 						if (simBoard[i - 1][j + 1] == '.') {
-							moves.add(newMove(newMove(i, j), newMove(i - 1, j + 1)));
+							ArrayList<Integer> parts = new ArrayList<Integer>();
+							parts.add((i * 10) + j);
+							parts.add(((i - 1) * 10) + j + 1);
+							moves.add(parts);
 						}
 					}
 					if (simBoard[i][j] != playerNum[1]) {
 						if (simBoard[i + 1][j - 1] == '.') {
-							moves.add(newMove(newMove(i, j), newMove(i + 1, j - 1)));
+							ArrayList<Integer> parts = new ArrayList<Integer>();
+							parts.add((i * 10) + j);
+							parts.add(((i + 1) * 10) + j - 1);
+							moves.add(parts);
 						}
 						if (simBoard[i + 1][j + 1] == '.') {
-							moves.add(newMove(newMove(i, j), newMove(i + 1, j + 1)));
+							ArrayList<Integer> parts = new ArrayList<Integer>();
+							parts.add((i * 10) + j);
+							parts.add(((i + 1) * 10) + j + 1);
+							moves.add(parts);
 						}
 					}
 				}
-				for (int k : altValidMove(player, newMove(i, j))) {
-					moves.add(newMove(newMove(i, j), k));
+				for (ArrayList<Integer> k : altValidMove(player, (i * 10) + j)) {
+					k.add(0, (i * 10) + j);
+					moves.add(k);
 				}
 			}
 		}
@@ -285,56 +302,65 @@ public class Checkers {
 	 * Parameters:
 	 * 		int player -> the side of which we are using
 	 * 		int pre -> the square which the capturing piece is on
-	 * Return: ArrayList<Integer> -> a list of all valid captures for a given piece in a position
+	 * Return: ArrayList<ArrayList<Integer>> -> a list of all valid captures for a given piece in a position
 	 * Output: None
 	 * Function: Given a starting square in the simulated board, it returns all possible captures and chain captures from that square for a certain player in a given position
 	 */
 	
-	public static ArrayList<Integer> altValidMove(int player, int pre) {
+	public static ArrayList<ArrayList<Integer>> altValidMove(int player, int pre) {
 		//variables, containers, and objects
 		char save;
-		ArrayList<Integer> tempMoves = new ArrayList<Integer>();
-		ArrayList<Integer> moves = new ArrayList<Integer>();
+		ArrayList<ArrayList<Integer>> tempMoves = new ArrayList<ArrayList<Integer>>();
+		ArrayList<ArrayList<Integer>> moves = new ArrayList<ArrayList<Integer>>();
 		
 		//flow control
 		if (simBoard[pre / 10][pre % 10] == playerNum[player] || simBoard[pre / 10][pre % 10] == playerNum[player + 2]) {
 			if (simBoard[pre / 10][pre % 10] != playerNum[0]) {
 				if (simBoard[(pre / 10) - 1][(pre % 10) - 1] == playerNum[(player + 1) % 4] || simBoard[(pre / 10) - 1][(pre % 10) - 1] == playerNum[(player + 3) % 4]) {
 					if (simBoard[(pre / 10) - 2][(pre % 10) - 2] == '.') {
-						tempMoves.add(newMove((pre / 10) - 2, (pre % 10) - 2));
+						ArrayList<Integer> parts = new ArrayList<Integer>();
+						parts.add((((pre / 10) - 2) * 10) + (pre % 10) - 2);
+						tempMoves.add(parts);
 					}
 				}
 				if (simBoard[(pre / 10) - 1][(pre % 10) + 1] == playerNum[(player + 1) % 4] || simBoard[(pre / 10) - 1][(pre % 10) + 1] == playerNum[(player + 3) % 4]) {
 					if (simBoard[(pre / 10) - 2][(pre % 10) + 2] == '.') {
-						tempMoves.add(newMove((pre / 10) - 2, (pre % 10) + 2));
+						ArrayList<Integer> parts = new ArrayList<Integer>();
+						parts.add((((pre / 10) - 2) * 10) + (pre % 10) + 2);
+						tempMoves.add(parts);
 					}
 				}
 			}
 			if (simBoard[pre / 10][pre % 10] != playerNum[1]) {
 				if (simBoard[(pre / 10) + 1][(pre % 10) - 1] == playerNum[(player + 1) % 4] || simBoard[(pre / 10) + 1][(pre % 10) - 1] == playerNum[(player + 3) % 4]) {
 					if (simBoard[(pre / 10) + 2][(pre % 10) - 2] == '.') {
-						tempMoves.add(newMove((pre / 10) + 2, (pre % 10) - 2));
+						ArrayList<Integer> parts = new ArrayList<Integer>();
+						parts.add((((pre / 10) + 2) * 10) + (pre % 10) - 2);
+						tempMoves.add(parts);
 					}
 				}
 				if (simBoard[(pre / 10) + 1][(pre % 10) + 1] == playerNum[(player + 1) % 4] || simBoard[(pre / 10) + 1][(pre % 10) + 1] == playerNum[(player + 3) % 4]) {
 					if (simBoard[(pre / 10) + 2][(pre % 10) + 2] == '.') {
-						tempMoves.add(newMove((pre / 10) + 2, (pre % 10) + 2));
+						ArrayList<Integer> parts = new ArrayList<Integer>();
+						parts.add((((pre / 10) + 2) * 10) + (pre % 10) + 2);
+						tempMoves.add(parts);
 					}
 				}
 			}
 		}
-		for (int i : tempMoves) {
+		for (ArrayList<Integer> i : tempMoves) {
 			moves.add(i);
-			save = simBoard[((pre / 10) + (i / 10)) / 2][((pre % 10) + (i % 10)) / 2];
-			simBoard[((pre / 10) + (i / 10)) / 2][((pre % 10) + (i % 10)) / 2] = '.';
-			simBoard[i / 10][i % 10] = simBoard[pre / 10][pre % 10];
+			save = simBoard[((pre / 10) + (i.get(0) / 10)) / 2][((pre % 10) + (i.get(0) % 10)) / 2];
+			simBoard[((pre / 10) + (i.get(0) / 10)) / 2][((pre % 10) + (i.get(0) % 10)) / 2] = '.';
+			simBoard[i.get(0) / 10][i.get(0) % 10] = simBoard[pre / 10][pre % 10];
 			simBoard[pre / 10][pre % 10] = '.';
-			for (int j : altValidMove(player, i)) {
-				moves.add(newMove(i, j));
+			for (ArrayList<Integer> j : altValidMove(player, i.get(0))) {
+				j.add(0, i.get(0));
+				moves.add(j);
 			}
-			simBoard[((pre / 10) + (i / 10)) / 2][((pre % 10) + (i % 10)) / 2] = save;
-			simBoard[pre / 10][pre % 10] = simBoard[i / 10][i % 10];
-			simBoard[i / 10][i % 10] = '.';
+			simBoard[((pre / 10) + (i.get(0) / 10)) / 2][((pre % 10) + (i.get(0) % 10)) / 2] = save;
+			simBoard[pre / 10][pre % 10] = simBoard[i.get(0) / 10][i.get(0) % 10];
+			simBoard[i.get(0) / 10][i.get(0) % 10] = '.';
 		}
 		return moves;
 	}
@@ -361,6 +387,7 @@ public class Checkers {
 			}
 		}
 		promote();
+		syncBoard();
 	}
 	
 	/* Method Name: promote
@@ -392,13 +419,32 @@ public class Checkers {
 	
 	public static boolean checkGame(int player) {
 		//variables, containers, and objects
-		ArrayList<Integer> moves = validMove(player);
+		ArrayList<ArrayList<Integer>> moves = validMove(player);
 		
 		//flow control
 		if (moves.size() == 0) {
 			return false;
 		}
 		return true;
+	}
+	
+	/* Method Name: checkMove
+	 * Parameters:
+	 * 		ArrayList<Integer> move -> the move received to be checked
+	 * 		ArrayList<ArrayList<Integer>> -> the set of moves to check
+	 * Return: boolean -> if the move set contains a certain move
+	 * Output: None
+	 * Function: Finds if a move set contains a certain move
+	 */
+	
+	public static boolean checkMove(ArrayList<Integer> move, ArrayList<ArrayList<Integer>> moves) {
+		//flow control
+		for (ArrayList<Integer> i : moves) {
+			if (move.equals(i)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/* Method Name: calcValue
@@ -467,9 +513,9 @@ public class Checkers {
 		int move;
 		String input;
 		syncBoard();
-		ArrayList<Integer> moves = validMove(player);
+		ArrayList<ArrayList<Integer>> moves = validMove(player);
 		
-		for (int i : moves) {
+		for (ArrayList<Integer> i : moves) {
 			System.out.print(i + " ");
 		}
 		
@@ -489,12 +535,15 @@ public class Checkers {
 			if (input.toUpperCase().equals("HELP")) {
 				help();
 			}
+			else if (input.length() == 0) {
+				System.out.println("Invalid move! Please enter a valid move, or enter Help for the help section.");
+			}
 			else if (input.charAt(0) == '?') {
 				query(input);
 			}
 			else if (isNum(input)) {
 				move = Integer.parseInt(input);
-				if (moves.contains(move)) {
+				if (checkMove(moveParts(move), moves)) {
 					doMove(moveParts(move));
 					break;
 				}
@@ -532,30 +581,29 @@ public class Checkers {
 	
 	public static void comMove(int player, int depth) {
 		//variables, containers, and objects
-		int move = 1000;
 		double value = -inf;
 		double tempValue;
+		ArrayList<Integer> move = new ArrayList<Integer>();
 		syncBoard();
-		ArrayList<Integer> moves = validMove(player);
+		ArrayList<ArrayList<Integer>> moves = validMove(player);
 		
 		//starting turn
 		outputBoard();
 		
 		//flow control
-		for (int i : moves) {
+		for (ArrayList<Integer> i : moves) {
 			System.out.print(i + " ");
-			ArrayList<Integer> parts = moveParts(i);
 			ArrayList<Character> saves = new ArrayList<Character>();
-			if (Math.abs((parts.get(0) / 10) - (parts.get(1) / 10)) == 1) {
-				simBoard[parts.get(1) / 10][parts.get(1) % 10] = simBoard[parts.get(0) / 10][parts.get(0) % 10];
-				simBoard[parts.get(0) / 10][parts.get(0) % 10] = '.';
+			if (Math.abs((i.get(0) / 10) - (i.get(1) / 10)) == 1) {
+				simBoard[i.get(1) / 10][i.get(1) % 10] = simBoard[i.get(0) / 10][i.get(0) % 10];
+				simBoard[i.get(0) / 10][i.get(0) % 10] = '.';
 			}
 			else {
-				for (int j = 0; j < parts.size() - 1; j++) {
-					simBoard[parts.get(j + 1) / 10][parts.get(j + 1) % 10] = simBoard[parts.get(j) / 10][parts.get(j) % 10];
-					saves.add(simBoard[((parts.get(j) / 10) + (parts.get(j + 1) / 10)) / 2][((parts.get(j) % 10) + (parts.get(j + 1) % 10)) / 2]);
-					simBoard[((parts.get(j) / 10) + (parts.get(j + 1) / 10)) / 2][((parts.get(j) % 10) + (parts.get(j + 1) % 10)) / 2] = '.';
-					simBoard[parts.get(j) / 10][parts.get(j) % 10] = '.';
+				for (int j = 0; j < i.size() - 1; j++) {
+					simBoard[i.get(j + 1) / 10][i.get(j + 1) % 10] = simBoard[i.get(j) / 10][i.get(j) % 10];
+					saves.add(simBoard[((i.get(j) / 10) + (i.get(j + 1) / 10)) / 2][((i.get(j) % 10) + (i.get(j + 1) % 10)) / 2]);
+					simBoard[((i.get(j) / 10) + (i.get(j + 1) / 10)) / 2][((i.get(j) % 10) + (i.get(j + 1) % 10)) / 2] = '.';
+					simBoard[i.get(j) / 10][i.get(j) % 10] = '.';
 				}
 			}
 			if (depth == 1) {
@@ -564,23 +612,23 @@ public class Checkers {
 			else {
 				tempValue = -altComMove((player + 1) % 2, depth - 1);
 			}
-			if (tempValue > value) {
+			if (tempValue >= value) {
 				value = tempValue;
 				move = i;
 			}
-			if (Math.abs((parts.get(0) / 10) - (parts.get(1) / 10)) == 1) {
-				simBoard[parts.get(0) / 10][parts.get(0) % 10] = simBoard[parts.get(1) / 10][parts.get(1) % 10];
-				simBoard[parts.get(1) / 10][parts.get(1) % 10] = '.';
+			if (Math.abs((i.get(0) / 10) - (i.get(1) / 10)) == 1) {
+				simBoard[i.get(0) / 10][i.get(0) % 10] = simBoard[i.get(1) / 10][i.get(1) % 10];
+				simBoard[i.get(1) / 10][i.get(1) % 10] = '.';
 			}
 			else {
-				for (int j = parts.size() - 1; j > 0; j--) {
-					simBoard[parts.get(j - 1) / 10][parts.get(j - 1) % 10] = simBoard[parts.get(j) / 10][parts.get(j) % 10];
-					simBoard[((parts.get(j - 1) / 10) + (parts.get(j) / 10)) / 2][((parts.get(j - 1) % 10) + (parts.get(j) % 10)) / 2] = saves.get(j - 1);
-					simBoard[parts.get(j) / 10][parts.get(j) % 10] = '.';
+				for (int j = i.size() - 1; j > 0; j--) {
+					simBoard[i.get(j - 1) / 10][i.get(j - 1) % 10] = simBoard[i.get(j) / 10][i.get(j) % 10];
+					simBoard[((i.get(j - 1) / 10) + (i.get(j) / 10)) / 2][((i.get(j - 1) % 10) + (i.get(j) % 10)) / 2] = saves.get(j - 1);
+					simBoard[i.get(j) / 10][i.get(j) % 10] = '.';
 				}
 			}
 		}
-		doMove(moveParts(move));
+		doMove(move);
 		System.out.println("The computer has played " + move + ".");
 		
 		//ending turn
@@ -605,22 +653,21 @@ public class Checkers {
 		//variables, containers, and objects
 		double value = -inf;
 		double tempValue;
-		ArrayList<Integer> moves = validMove(player);
+		ArrayList<ArrayList<Integer>> moves = validMove(player);
 		
 		//flow control
-		for (int i : moves) {
-			ArrayList<Integer> parts = moveParts(i);
+		for (ArrayList<Integer> i : moves) {
 			ArrayList<Character> saves = new ArrayList<Character>();
-			if (Math.abs((parts.get(0) / 10) - (parts.get(1) / 10)) == 1) {
-				simBoard[parts.get(1) / 10][parts.get(1) % 10] = simBoard[parts.get(0) / 10][parts.get(0) % 10];
-				simBoard[parts.get(0) / 10][parts.get(0) % 10] = '.';
+			if (Math.abs((i.get(0) / 10) - (i.get(1) / 10)) == 1) {
+				simBoard[i.get(1) / 10][i.get(1) % 10] = simBoard[i.get(0) / 10][i.get(0) % 10];
+				simBoard[i.get(0) / 10][i.get(0) % 10] = '.';
 			}
 			else {
-				for (int j = 0; j < parts.size() - 1; j++) {
-					simBoard[parts.get(j + 1) / 10][parts.get(j + 1) % 10] = simBoard[parts.get(j) / 10][parts.get(j) % 10];
-					saves.add(simBoard[((parts.get(j) / 10) + (parts.get(j + 1) / 10)) / 2][((parts.get(j) % 10) + (parts.get(j + 1) % 10)) / 2]);
-					simBoard[((parts.get(j) / 10) + (parts.get(j + 1) / 10)) / 2][((parts.get(j) % 10) + (parts.get(j + 1) % 10)) / 2] = '.';
-					simBoard[parts.get(j) / 10][parts.get(j) % 10] = '.';
+				for (int j = 0; j < i.size() - 1; j++) {
+					simBoard[i.get(j + 1) / 10][i.get(j + 1) % 10] = simBoard[i.get(j) / 10][i.get(j) % 10];
+					saves.add(simBoard[((i.get(j) / 10) + (i.get(j + 1) / 10)) / 2][((i.get(j) % 10) + (i.get(j + 1) % 10)) / 2]);
+					simBoard[((i.get(j) / 10) + (i.get(j + 1) / 10)) / 2][((i.get(j) % 10) + (i.get(j + 1) % 10)) / 2] = '.';
+					simBoard[i.get(j) / 10][i.get(j) % 10] = '.';
 				}
 			}
 			if (depth == 1) {
@@ -629,18 +676,18 @@ public class Checkers {
 			else {
 				tempValue = -altComMove((player + 1) % 2, depth - 1);
 			}
-			if (tempValue > value) {
+			if (tempValue >= value) {
 				value = tempValue;
 			}
-			if (Math.abs((parts.get(0) / 10) - (parts.get(1) / 10)) == 1) {
-				simBoard[parts.get(0) / 10][parts.get(0) % 10] = simBoard[parts.get(1) / 10][parts.get(1) % 10];
-				simBoard[parts.get(1) / 10][parts.get(1) % 10] = '.';
+			if (Math.abs((i.get(0) / 10) - (i.get(1) / 10)) == 1) {
+				simBoard[i.get(0) / 10][i.get(0) % 10] = simBoard[i.get(1) / 10][i.get(1) % 10];
+				simBoard[i.get(1) / 10][i.get(1) % 10] = '.';
 			}
 			else {
-				for (int j = parts.size() - 1; j > 0; j--) {
-					simBoard[parts.get(j - 1) / 10][parts.get(j - 1) % 10] = simBoard[parts.get(j) / 10][parts.get(j) % 10];
-					simBoard[((parts.get(j - 1) / 10) + (parts.get(j) / 10)) / 2][((parts.get(j - 1) % 10) + (parts.get(j) % 10)) / 2] = saves.get(j - 1);
-					simBoard[parts.get(j) / 10][parts.get(j) % 10] = '.';
+				for (int j = i.size() - 1; j > 0; j--) {
+					simBoard[i.get(j - 1) / 10][i.get(j - 1) % 10] = simBoard[i.get(j) / 10][i.get(j) % 10];
+					simBoard[((i.get(j - 1) / 10) + (i.get(j) / 10)) / 2][((i.get(j - 1) % 10) + (i.get(j) % 10)) / 2] = saves.get(j - 1);
+					simBoard[i.get(j) / 10][i.get(j) % 10] = '.';
 				}
 			}
 		}
