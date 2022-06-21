@@ -24,6 +24,7 @@ public class Checkers {
 	
 	public static void main(String[] args) {
 		//variables, containers, and objects
+		int loadingGame;
 		String input;
 		
 		//flow control
@@ -51,7 +52,29 @@ public class Checkers {
 			playerName[0] = sc.nextLine();
 			System.out.print("Player 2's name: ");
 			playerName[1] = sc.nextLine();
-			playerMove(0);
+			while (true) {
+				System.out.print("New game (1) or load a game(2): ");
+				input = sc.nextLine();
+				if (isNum(input)) {
+					loadingGame = Integer.parseInt(input);
+					if (loadingGame == 1 || loadingGame == 2) {
+						break;
+					}
+				}
+				System.out.println("That is not a valid input, please try again.");
+			}
+			if (loadingGame == 1) {
+				playerMove(0);
+			}
+			else {
+				try {
+					BufferedReader br = new BufferedReader(new FileReader(playerName[0] + "-" + playerName[1] + ".txt"));
+					loadGame(playerName[0] + "-" + playerName[1] + ".txt");
+				} catch (FileNotFoundException e) {
+					System.out.println("There are no games saved under this matching, creating new game instead.");
+					playerMove(0);
+				}
+			}
 		}
 		else {
 			//one player
@@ -93,6 +116,36 @@ public class Checkers {
 				System.out.println("That is not a valid input, please try again.");
 			}
 		}
+	}
+	
+	/* Method Name: loadGame
+	 * Parameters:
+	 * Return:
+	 * Output:
+	 * Function:
+	 */
+	
+	public static boolean loadGame(String name) {
+		//flow control
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(name + ".txt"));
+			
+		} catch (FileNotFoundException e) {
+			System.out.println("Alright buddy, what happened?");
+		}
+		
+		return true;
+	}
+	
+	/* Method Name: saveGame
+	 * Parameters:
+	 * Return:
+	 * Output:
+	 * Function:
+	 */
+	
+	public static void saveGame() {
+		
 	}
 	
 	/* Method Name: isNum
