@@ -13,7 +13,9 @@ public class Checkers {
 	//variables, containers, and objects used in a static reference (deal with it)
 	static boolean twoPlayer;
 	static int comDepth;
+	static int turns = -1;
 	static final int inf = 2147483647;
+	static int capture[] = {0, 0};
 	static char board[][] = new char[10][10];
 	static char simBoard[][] = new char[10][10];
 	static char playerNum[] = {'o', 'x', 'O', 'X'};
@@ -78,10 +80,12 @@ public class Checkers {
 				input = sc.nextLine();
 				if (isNum(input)) {
 					if (Integer.parseInt(input) == 1) {
+						playerName[1] = null;
 						playerMove(0);
 						break;
 					}
 					if (Integer.parseInt(input) == 2) {
+						playerName[0] = null;
 						comMove(0, comDepth);
 						break;
 					}
@@ -109,22 +113,6 @@ public class Checkers {
 			isNum = true;
 		} catch (NumberFormatException e) {}
 		return isNum;
-	}
-	
-	/* Method Name: newMove
-	 * Parameters:
-	 * 		ArrayList<Integer> pre -> the prefix section of the new integer
-	 * 		ArrayList<Integer> suf -> the suffix section of the new integer
-	 * Return: ArrayList<Integer> -> the parameters combined
-	 * Output: None
-	 * Function: Given a prefix move section and a suffix move section, it concatenates them and returns a combined move
-	 */
-	
-	public static ArrayList<Integer> newMove(ArrayList<Integer> pre, ArrayList<Integer> suf) {
-		for (int i : suf) {
-			pre.add(i);
-		}
-		return pre;
 	}
 	
 	/* Method Name: outputBoard
@@ -244,6 +232,24 @@ public class Checkers {
 		return parts;
 	}
 	
+	/* Method Name: insert
+	 * Parameters:
+	 * 		ArrayList<ArrayList<Integer>> moves -> a list of valid moves
+	 * 		ArrayList<Integer> move -> a composition of the move to be inserted
+	 * Return: ArrayList<Integer> -> a blank move composition
+	 * Output: None
+	 * Function: Properly adds moves to a list while returning a new slate to be used
+	 */
+	
+	public static ArrayList<Integer> insert(ArrayList<Integer> move, ArrayList<ArrayList<Integer>> moves) {
+		//variables, containers, and objects
+		ArrayList<Integer> newMove = new ArrayList<Integer>();
+		
+		//flow control
+		moves.add(move);
+		return newMove;
+	}
+	
 	/* Method Name: validMove
 	 * Parameters:
 	 * 		int player -> the player of which the moves are found
@@ -254,6 +260,7 @@ public class Checkers {
 	
 	public static ArrayList<ArrayList<Integer>> validMove(int player) {
 		//variables, containers, and objects
+		ArrayList<Integer> move = new ArrayList<Integer>();
 		ArrayList<ArrayList<Integer>> moves = new ArrayList<ArrayList<Integer>>();
 		
 		//flow control
@@ -262,30 +269,26 @@ public class Checkers {
 				if (simBoard[i][j] == playerNum[player] || simBoard[i][j] == playerNum[player + 2]) {
 					if (simBoard[i][j] != playerNum[0]) {
 						if (simBoard[i - 1][j - 1] == '.') {
-							ArrayList<Integer> parts = new ArrayList<Integer>();
-							parts.add((i * 10) + j);
-							parts.add(((i - 1) * 10) + j - 1);
-							moves.add(parts);
+							move.add((i * 10) + j);
+							move.add(((i - 1) * 10) + j - 1);
+							move = insert(move, moves);
 						}
 						if (simBoard[i - 1][j + 1] == '.') {
-							ArrayList<Integer> parts = new ArrayList<Integer>();
-							parts.add((i * 10) + j);
-							parts.add(((i - 1) * 10) + j + 1);
-							moves.add(parts);
+							move.add((i * 10) + j);
+							move.add(((i - 1) * 10) + j + 1);
+							move = insert(move, moves);
 						}
 					}
 					if (simBoard[i][j] != playerNum[1]) {
 						if (simBoard[i + 1][j - 1] == '.') {
-							ArrayList<Integer> parts = new ArrayList<Integer>();
-							parts.add((i * 10) + j);
-							parts.add(((i + 1) * 10) + j - 1);
-							moves.add(parts);
+							move.add((i * 10) + j);
+							move.add(((i + 1) * 10) + j - 1);
+							move = insert(move, moves);
 						}
 						if (simBoard[i + 1][j + 1] == '.') {
-							ArrayList<Integer> parts = new ArrayList<Integer>();
-							parts.add((i * 10) + j);
-							parts.add(((i + 1) * 10) + j + 1);
-							moves.add(parts);
+							move.add((i * 10) + j);
+							move.add(((i + 1) * 10) + j + 1);
+							move = insert(move, moves);
 						}
 					}
 				}
@@ -310,6 +313,7 @@ public class Checkers {
 	public static ArrayList<ArrayList<Integer>> altValidMove(int player, int pre) {
 		//variables, containers, and objects
 		char save;
+		ArrayList<Integer> move = new ArrayList<Integer>();
 		ArrayList<ArrayList<Integer>> tempMoves = new ArrayList<ArrayList<Integer>>();
 		ArrayList<ArrayList<Integer>> moves = new ArrayList<ArrayList<Integer>>();
 		
@@ -318,32 +322,28 @@ public class Checkers {
 			if (simBoard[pre / 10][pre % 10] != playerNum[0]) {
 				if (simBoard[(pre / 10) - 1][(pre % 10) - 1] == playerNum[(player + 1) % 4] || simBoard[(pre / 10) - 1][(pre % 10) - 1] == playerNum[(player + 3) % 4]) {
 					if (simBoard[(pre / 10) - 2][(pre % 10) - 2] == '.') {
-						ArrayList<Integer> parts = new ArrayList<Integer>();
-						parts.add((((pre / 10) - 2) * 10) + (pre % 10) - 2);
-						tempMoves.add(parts);
+						move.add((((pre / 10) - 2) * 10) + (pre % 10) - 2);
+						move = insert(move, tempMoves);
 					}
 				}
 				if (simBoard[(pre / 10) - 1][(pre % 10) + 1] == playerNum[(player + 1) % 4] || simBoard[(pre / 10) - 1][(pre % 10) + 1] == playerNum[(player + 3) % 4]) {
 					if (simBoard[(pre / 10) - 2][(pre % 10) + 2] == '.') {
-						ArrayList<Integer> parts = new ArrayList<Integer>();
-						parts.add((((pre / 10) - 2) * 10) + (pre % 10) + 2);
-						tempMoves.add(parts);
+						move.add((((pre / 10) - 2) * 10) + (pre % 10) + 2);
+						move = insert(move, tempMoves);
 					}
 				}
 			}
 			if (simBoard[pre / 10][pre % 10] != playerNum[1]) {
 				if (simBoard[(pre / 10) + 1][(pre % 10) - 1] == playerNum[(player + 1) % 4] || simBoard[(pre / 10) + 1][(pre % 10) - 1] == playerNum[(player + 3) % 4]) {
 					if (simBoard[(pre / 10) + 2][(pre % 10) - 2] == '.') {
-						ArrayList<Integer> parts = new ArrayList<Integer>();
-						parts.add((((pre / 10) + 2) * 10) + (pre % 10) - 2);
-						tempMoves.add(parts);
+						move.add((((pre / 10) + 2) * 10) + (pre % 10) - 2);
+						move = insert(move, tempMoves);
 					}
 				}
 				if (simBoard[(pre / 10) + 1][(pre % 10) + 1] == playerNum[(player + 1) % 4] || simBoard[(pre / 10) + 1][(pre % 10) + 1] == playerNum[(player + 3) % 4]) {
 					if (simBoard[(pre / 10) + 2][(pre % 10) + 2] == '.') {
-						ArrayList<Integer> parts = new ArrayList<Integer>();
-						parts.add((((pre / 10) + 2) * 10) + (pre % 10) + 2);
-						tempMoves.add(parts);
+						move.add((((pre / 10) + 2) * 10) + (pre % 10) + 2);
+						move = insert(move, tempMoves);
 					}
 				}
 			}
@@ -381,6 +381,12 @@ public class Checkers {
 		}
 		else {
 			for (int j = 0; j < parts.size() - 1; j++) {
+				if (board[parts.get(j) / 10][parts.get(j) % 10] == 'o' || board[parts.get(j) / 10][parts.get(j) % 10] == 'O') {
+					capture[0]++;
+				}
+				else {
+					capture[1]++;
+				}
 				board[parts.get(j + 1) / 10][parts.get(j + 1) % 10] = board[parts.get(j) / 10][parts.get(j) % 10];
 				board[((parts.get(j) / 10) + (parts.get(j + 1) / 10)) / 2][((parts.get(j) % 10) + (parts.get(j + 1) % 10)) / 2] = '.';
 				board[parts.get(j) / 10][parts.get(j) % 10] = '.';
@@ -405,6 +411,40 @@ public class Checkers {
 			}
 			if (board[1][i] == 'x') {
 				board[1][i] = 'X';
+			}
+		}
+	}
+	
+	/* Method Name: endGame
+	 * Parameters:
+	 * 		boolean isCom -> if the winner is a computer
+	 * 		int player -> if the winner is playing as X or O
+	 * Return None:
+	 * Output: The ending outputs for a game ending
+	 * Function: Ends a game with proper outputs
+	 */
+	
+	public static void endGame(boolean isCom, int player) {
+		//flow control and output
+		if (isCom) {
+			System.out.println("The computer has won!");
+		}
+		else {
+			System.out.println("Player " + playerName[player] + " has won!");
+		}
+		System.out.println("The game lasted " + turns + " turns.");
+		if (twoPlayer) {
+			System.out.println("Player " + playerName[0] + " captured " + capture[0] + " X pieces.");
+			System.out.println("Player " + playerName[1] + " captured " + capture[1] + " O pieces.");
+		}
+		else {
+			if (playerName[0] == null) {
+				System.out.println("The computer captured " + capture[0] + " X pieces.");
+				System.out.println("Player " + playerName[1] + " captured " + capture[1] + " O pieces");
+			}
+			else {
+				System.out.println("Player " + playerName[0] + " captured " + capture[0] + " O pieces");
+				System.out.println("The computer captured " + capture[1] + " X pieces.");
 			}
 		}
 	}
@@ -510,6 +550,7 @@ public class Checkers {
 	
 	public static void playerMove(int player) {
 		//variables, containers, and objects
+		boolean resign = false;
 		int move;
 		String input;
 		syncBoard();
@@ -521,6 +562,7 @@ public class Checkers {
 		
 		//starting turn
 		outputBoard();
+		turns++;
 		if (player == 0) {
 			System.out.println(playerName[player] + ", make your turn. You are playing as O.");
 		}
@@ -534,6 +576,10 @@ public class Checkers {
 			input = sc.nextLine();
 			if (input.toUpperCase().equals("HELP")) {
 				help();
+			}
+			if (input.toUpperCase().equals("RESIGN")) {
+				resign = true;
+				break;
 			}
 			else if (input.length() == 0) {
 				System.out.println("Invalid move! Please enter a valid move, or enter Help for the help section.");
@@ -558,7 +604,10 @@ public class Checkers {
 		
 		//ending turn
 		if (!checkGame((player + 1) % 2)) {
-			System.out.println("Player " + playerName[player] + " has won!");
+			endGame(true, player);
+		}
+		else if (resign) {
+			endGame(!twoPlayer, (player + 1) % 2);
 		}
 		else {
 			if (twoPlayer) {
@@ -584,16 +633,18 @@ public class Checkers {
 		double value = -inf;
 		double tempValue;
 		ArrayList<Integer> move = new ArrayList<Integer>();
+		ArrayList<Character> saves = new ArrayList<Character>();
 		syncBoard();
 		ArrayList<ArrayList<Integer>> moves = validMove(player);
 		
 		//starting turn
 		outputBoard();
+		turns++;
 		
 		//flow control
 		for (ArrayList<Integer> i : moves) {
 			System.out.print(i + " ");
-			ArrayList<Character> saves = new ArrayList<Character>();
+			saves.clear();
 			if (Math.abs((i.get(0) / 10) - (i.get(1) / 10)) == 1) {
 				simBoard[i.get(1) / 10][i.get(1) % 10] = simBoard[i.get(0) / 10][i.get(0) % 10];
 				simBoard[i.get(0) / 10][i.get(0) % 10] = '.';
@@ -633,7 +684,7 @@ public class Checkers {
 		
 		//ending turn
 		if (!checkGame((player + 1) % 2)) {
-			System.out.println("The computer has won!");
+			endGame(true, player);
 		}
 		else {
 			playerMove((player + 1) % 2);
@@ -644,7 +695,7 @@ public class Checkers {
 	 * Parameters:
 	 * 		int player -> if the computer simulates playing as X or O
 	 * 		int depth -> how far the computer searches in the future to simulate moves
-	 * Return: double -> the optimal move for the current simulated board
+	 * Return: double -> the optimal evaluation for the current simulated board
 	 * Output: None
 	 * Function: Simulates a possible play if a turn is played, all simulated by the computer to be used in turn calculations
 	 */
@@ -653,11 +704,12 @@ public class Checkers {
 		//variables, containers, and objects
 		double value = -inf;
 		double tempValue;
+		ArrayList<Character> saves = new ArrayList<Character>();
 		ArrayList<ArrayList<Integer>> moves = validMove(player);
 		
 		//flow control
 		for (ArrayList<Integer> i : moves) {
-			ArrayList<Character> saves = new ArrayList<Character>();
+			saves.clear();
 			if (Math.abs((i.get(0) / 10) - (i.get(1) / 10)) == 1) {
 				simBoard[i.get(1) / 10][i.get(1) % 10] = simBoard[i.get(0) / 10][i.get(0) % 10];
 				simBoard[i.get(0) / 10][i.get(0) % 10] = '.';
@@ -816,5 +868,7 @@ public class Checkers {
 		System.out.println("A query can be described as ?<row><column>.");
 		System.out.println("Here is an example set for example board a):");
 		System.out.println("?11 -> King O Piece, ?12 -> Empty Square, ?22 -> Non-King X Piece\n");
+		System.out.println("Resigning:");
+		System.out.println("Resigning is an option that can be made at any time during a turn, and can be done by entering <Resign>.\n");
 	}
 }
