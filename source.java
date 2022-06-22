@@ -12,9 +12,10 @@ import java.io.*;
 public class Checkers {
 	//variables, containers, and objects used in a static reference (deal with it)
 	static boolean twoPlayer;
-	static int comDepth;
+	static int comDepth = -1;
 	static int turns = -1;
 	static final int inf = 2147483647;
+	static String fileName;
 	static int capture[] = {0, 0};
 	static char board[][] = new char[10][10];
 	static char simBoard[][] = new char[10][10];
@@ -23,6 +24,17 @@ public class Checkers {
 	static Scanner sc = new Scanner(System.in);
 	
 	public static void main(String[] args) {
+		//flow control
+		menu();
+	}
+	
+	/* Method Name: menu
+	 * Parameters: None
+	 * Return: None
+	 * Output: Prompts from the menu
+	 * Function: Starting point of each game
+	 */	
+	public static void menu() {
 		//variables, containers, and objects
 		int loadingGame;
 		String input;
@@ -53,7 +65,8 @@ public class Checkers {
 			System.out.print("Player 2's name: ");
 			playerName[1] = sc.nextLine();
 			while (true) {
-				System.out.print("New game (1) or load a game(2): ");
+				fileName = playerName[0] + "-" + playerName[1] + ".txt";
+				System.out.print("New game (1) or load a game (2): ");
 				input = sc.nextLine();
 				if (isNum(input)) {
 					loadingGame = Integer.parseInt(input);
@@ -63,28 +76,44 @@ public class Checkers {
 				}
 				System.out.println("That is not a valid input, please try again.");
 			}
-			if (loadingGame == 1) {
-				playerMove(0);
-			}
-			else {
+			if (loadingGame == 2) {
 				try {
-					BufferedReader br = new BufferedReader(new FileReader(playerName[0] + "-" + playerName[1] + ".txt"));
-					loadGame(playerName[0] + "-" + playerName[1] + ".txt");
-				} catch (FileNotFoundException e) {
-					System.out.println("There are no games saved under this matching, creating new game instead.");
-					playerMove(0);
+					BufferedReader br = new BufferedReader(new FileReader(fileName));
+					br.close();
+					loadGame();
+				} catch (Exception e) {
+					System.out.println("There is no saved game under this matching, making new game instead.");
 				}
 			}
+			playerMove(0);
 		}
 		else {
 			//one player
-			//name input
 			System.out.print("Player's name: ");
 			input = sc.nextLine();
 			playerName[0] = input;
 			playerName[1] = input;
-			
-			//computer depth
+			fileName = input + ".txt";
+			while (true) {
+				System.out.print("New game (1) or load a game (2): ");
+				input = sc.nextLine();
+				if (isNum(input)) {
+					loadingGame = Integer.parseInt(input);
+					if (loadingGame == 1 || loadingGame == 2) {
+						break;
+					}
+				}
+				System.out.println("That is not a valid input, please try again.");
+			}
+			if (loadingGame == 2) {
+				try {
+					BufferedReader br = new BufferedReader(new FileReader(fileName));
+					br.close();
+					loadGame();
+				} catch (Exception e) {
+					System.out.println("There is no saved game under this matching, making new game instead.");
+				}
+			}
 			while (true) {
 				System.out.print("Computer depth (between 1 and 6 for faster but less accurate play, 7 or 8 for slower but more accurate play): ");
 				input = sc.nextLine();
@@ -96,8 +125,6 @@ public class Checkers {
 				}
 				System.out.println("That is not a valid input, please try again.");
 			}
-			
-			//move order
 			while (true) {
 				System.out.print("Would you like to go first (1) or second (2): ");
 				input = sc.nextLine();
@@ -119,33 +146,111 @@ public class Checkers {
 	}
 	
 	/* Method Name: loadGame
-	 * Parameters:
-	 * Return:
-	 * Output:
-	 * Function:
+	 * Parameters: None
+	 * Return: None
+	 * Output: None
+	 * Function: Loads a game from a text file
 	 */
 	
-	public static boolean loadGame(String name) {
+	public static void loadGame() {
+		//variables, containers, and objects
+		int playerData;
+		int playerTurn;
+		String input;
+		
 		//flow control
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(name + ".txt"));
-			
-		} catch (FileNotFoundException e) {
-			System.out.println("Alright buddy, what happened?");
+			BufferedReader br = new BufferedReader(new FileReader(fileName));
+			playerData = Integer.parseInt(br.readLine());
+			for (int i = 1; i <= 8; i++) {
+				input = br.readLine();
+				for (int j = 1; j <= 8; j++) {
+					board[i][j] = input.charAt(j - 1);
+				}
+			}
+			playerTurn = Integer.parseInt(br.readLine());
+			turns = Integer.parseInt(br.readLine());
+			capture[0] = Integer.parseInt(br.readLine());
+			capture[1] = Integer.parseInt(br.readLine());
+			comDepth = Integer.parseInt(br.readLine());
+			br.close();
+			if (playerData == 2) {
+				playerMove(playerTurn);
+			}
+			else if (playerData == playerTurn) {
+				playerMove(playerTurn);
+			}
+			else {
+				comMove(playerTurn, comDepth);
+			}
+		} catch (Exception e) {
+			System.out.println("You should not be seeing this message.");
 		}
-		
-		return true;
 	}
 	
 	/* Method Name: saveGame
 	 * Parameters:
-	 * Return:
-	 * Output:
-	 * Function:
+	 * 		int player -> the player who plays next
+	 * Return: None
+	 * Output: None
+	 * Function: Saves the game in a text file
 	 */
 	
-	public static void saveGame() {
+	public static void saveGame(int player) {
+		//flow control
+		try {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(fileName, false));
+			if (twoPlayer) {
+				bw.write("2\n");
+			}
+			else if (playerName[0] == null) {
+				bw.write("1\n");
+			}
+			else {
+				bw.write("0\n");
+			}
+			for (int i = 1; i <= 8; i++) {
+				for (int j = 1; j <= 8; j++) {
+					bw.write(board[i][j]);
+				}
+				bw.write("\n");
+			}
+			bw.write(Integer.toString(player) + "\n");
+			bw.write(Integer.toString(turns) + "\n");
+			bw.write(Integer.toString(capture[0]) + "\n");
+			bw.write(Integer.toString(capture[1]) + "\n");
+			bw.write(Integer.toString(comDepth));
+			bw.close();
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+	}
+	
+	/* Method Name: quitGame
+	 * Parameters: None
+	 * Return: None
+	 * Output: A quit statement
+	 * Function: Acts as a logical dead end for a game to quit a game
+	 */
+	public static void quitGame() {
+		//variables, containers, and objects
+		String input;
 		
+		//flow control
+		while (true) {
+			System.out.print("Menu (1) or quit (2): ");
+			input = sc.nextLine();
+			if (isNum(input)) {
+				if (Integer.parseInt(input) == 1) {
+					menu();
+				}
+				if (Integer.parseInt(input) == 2) {
+					System.out.println("Quitting game.");
+					break;
+				}
+			}
+			System.out.println("That is not a valid input, please try again.");
+		}
 	}
 	
 	/* Method Name: isNum
@@ -604,14 +709,11 @@ public class Checkers {
 	public static void playerMove(int player) {
 		//variables, containers, and objects
 		boolean resign = false;
+		boolean quit = false;
 		int move;
 		String input;
 		syncBoard();
 		ArrayList<ArrayList<Integer>> moves = validMove(player);
-		
-		for (ArrayList<Integer> i : moves) {
-			System.out.print(i + " ");
-		}
 		
 		//starting turn
 		outputBoard();
@@ -622,6 +724,14 @@ public class Checkers {
 		else {
 			System.out.println(playerName[player] + ", make your turn. You are playing as X.");
 		}
+		System.out.print("Moves: ");
+		for (ArrayList<Integer> i : moves) {
+			for (int j : i) {
+				System.out.print(j);
+			}
+			System.out.print(" ");
+		}
+		System.out.println();
 		
 		//flow control
 		while(true) {
@@ -630,8 +740,12 @@ public class Checkers {
 			if (input.toUpperCase().equals("HELP")) {
 				help();
 			}
-			if (input.toUpperCase().equals("RESIGN")) {
+			else if (input.toUpperCase().equals("RESIGN")) {
 				resign = true;
+				break;
+			}
+			else if (input.toUpperCase().equals("QUIT")) {
+				quit = true;
 				break;
 			}
 			else if (input.length() == 0) {
@@ -656,18 +770,24 @@ public class Checkers {
 		}
 		
 		//ending turn
-		if (!checkGame((player + 1) % 2)) {
-			endGame(true, player);
-		}
-		else if (resign) {
-			endGame(!twoPlayer, (player + 1) % 2);
+		if (quit) {
+			quitGame();
 		}
 		else {
-			if (twoPlayer) {
-				playerMove((player + 1) % 2);
+			saveGame((player + 1) % 2);
+			if (!checkGame((player + 1) % 2)) {
+				endGame(true, player);
+			}
+			else if (resign) {
+				endGame(!twoPlayer, (player + 1) % 2);
 			}
 			else {
-				comMove((player + 1) % 2, comDepth);
+				if (twoPlayer) {
+					playerMove((player + 1) % 2);
+				}
+				else {
+					comMove((player + 1) % 2, comDepth);
+				}
 			}
 		}
 	}
@@ -693,10 +813,17 @@ public class Checkers {
 		//starting turn
 		outputBoard();
 		turns++;
+		System.out.print("Moves: ");
+		for (ArrayList<Integer> i : moves) {
+			for (int j : i) {
+				System.out.print(j);
+			}
+			System.out.print(" ");
+		}
+		System.out.println();
 		
 		//flow control
 		for (ArrayList<Integer> i : moves) {
-			System.out.print(i + " ");
 			saves.clear();
 			if (Math.abs((i.get(0) / 10) - (i.get(1) / 10)) == 1) {
 				simBoard[i.get(1) / 10][i.get(1) % 10] = simBoard[i.get(0) / 10][i.get(0) % 10];
@@ -733,9 +860,14 @@ public class Checkers {
 			}
 		}
 		doMove(move);
-		System.out.println("The computer has played " + move + ".");
+		System.out.print("The computer has played ");
+		for (int i : move) {
+			System.out.print(i);
+		}
+		System.out.println(".");
 		
 		//ending turn
+		saveGame((player + 1) % 2);
 		if (!checkGame((player + 1) % 2)) {
 			endGame(true, player);
 		}
@@ -923,5 +1055,8 @@ public class Checkers {
 		System.out.println("?11 -> King O Piece, ?12 -> Empty Square, ?22 -> Non-King X Piece\n");
 		System.out.println("Resigning:");
 		System.out.println("Resigning is an option that can be made at any time during a turn, and can be done by entering <Resign>.\n");
+		System.out.println("Saving And Quitting:");
+		System.out.println("During you turn, you can quit. Saving is done automatically after each move.");
+		System.out.println("Quitting simply requires the user to enter <Quit>.\n");
 	}
 }
