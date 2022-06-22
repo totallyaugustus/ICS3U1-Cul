@@ -40,7 +40,7 @@ public class Checkers {
 		String input;
 		
 		//flow control
-		//amount of players
+		System.out.println("Menu:");
 		while (true) {
 			System.out.print("One player (1) or two players (2): ");
 			input = sc.nextLine();
@@ -57,7 +57,6 @@ public class Checkers {
 			System.out.println("That is not a valid input, please try again.");
 		}
 		newGameStart();
-		
 		if (twoPlayer) {
 			//two player
 			System.out.print("Player 1's name: ");
@@ -242,6 +241,7 @@ public class Checkers {
 			input = sc.nextLine();
 			if (isNum(input)) {
 				if (Integer.parseInt(input) == 1) {
+					System.out.println();
 					menu();
 				}
 				if (Integer.parseInt(input) == 2) {
@@ -276,13 +276,13 @@ public class Checkers {
 	/* Method Name: outputBoard
 	 * Parameters: None
 	 * Return: None
-	 * Output: Game Board, Axis Coordinates
+	 * Output: Game board along with axis coordinates
 	 * Function: Outputs the real board with row and column axis coordinates
 	 */
 	
 	public static void outputBoard() {
 		//flow control and output
-		System.out.print("  ");
+		System.out.print("\n  ");
 		for (int i = 1; i <= 8; i++) {
 			System.out.print(i + " ");
 		}
@@ -583,6 +583,9 @@ public class Checkers {
 	 */
 	
 	public static void endGame(boolean isCom, int player) {
+		//variables, containers, and objects
+		File file = new File(fileName);
+		
 		//flow control and output
 		if (isCom) {
 			System.out.println("The computer has won!");
@@ -605,6 +608,9 @@ public class Checkers {
 				System.out.println("The computer captured " + capture[1] + " X pieces.");
 			}
 		}
+		System.out.println("");
+		file.delete();
+		quitGame();
 	}
 	
 	/* Method Name: checkGame
@@ -731,7 +737,7 @@ public class Checkers {
 			}
 			System.out.print(" ");
 		}
-		System.out.println();
+		System.out.println("");
 		
 		//flow control
 		while(true) {
@@ -820,7 +826,7 @@ public class Checkers {
 			}
 			System.out.print(" ");
 		}
-		System.out.println();
+		System.out.println("");
 		
 		//flow control
 		for (ArrayList<Integer> i : moves) {
