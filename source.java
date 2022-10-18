@@ -1060,9 +1060,9 @@ public class Checkers {
 		System.out.println("Here is an example set for example board a):");
 		System.out.println("?11 -> King O Piece, ?12 -> Empty Square, ?22 -> Non-King X Piece\n");
 		System.out.println("Resigning:");
-		System.out.println("Resigning is an option that can be made at any time during a turn, and can be done by entering <Resign>.\n");
+		System.out.println("Resigning is an option that can be made at any time during your turn, and can be done by entering <Resign>.\n");
 		System.out.println("Saving And Quitting:");
-		System.out.println("During you turn, you can quit. Saving is done automatically after each move.");
+		System.out.println("During your turn, you can quit. Saving is done automatically after each move.");
 		System.out.println("Quitting simply requires the user to enter <Quit>.\n");
 	}
 }
